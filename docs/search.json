@@ -1,17 +1,31 @@
 [
   {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
+    "objectID": "posts/db-connections-command-line/index.html",
+    "href": "posts/db-connections-command-line/index.html",
+    "title": "Testing Database Connections from the Linux Command Line",
     "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+    "text": "Posit Pro drivers allow you to easily connect your Workbench & Connect servers to external databases. The steps to install these drivers can be found here: https://docs.posit.co/pro-drivers/workbench-connect/\nYour best option is to isolate the product, and try to connect to your database natively from the command line. You can test connections by running isql, which is a command line tool for interactive SQL queries. To do so, you will need to create an odbc.ini file in the /etc directory.\nTo create a new DSN: 1. Edit the /etc/odbc.ini file. 2. Add a new entry for your desired database type by copying over the sample from /opt/rstudio-drivers/odbc.ini.sample. 3. Ensure that the Driver setting in the DSN refers to the corresponding driver name or path listed in /etc/odbcinst.ini. 4. Modify the entry with your desired connection parameters\nFor example, to add a SQL Server connection:"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Cecil’s Data Science Blog",
+    "objectID": "posts/db-connections-command-line/index.html#file-etcodbc.ini",
+    "href": "posts/db-connections-command-line/index.html#file-etcodbc.ini",
+    "title": "Testing Database Connections from the Linux Command Line",
+    "section": "File: /etc/odbc.ini",
+    "text": "File: /etc/odbc.ini\n[test]\nDriver = SQLServer\nServer = my.server.name\nDatabase = dbname\nPort = 1433\nTo test this connection, run the following command in the Linux terminal:\nisql -v test"
+  },
+  {
+    "objectID": "posts/Connecting-Workbench-Connect-to-AWS-S3/index.html",
+    "href": "posts/Connecting-Workbench-Connect-to-AWS-S3/index.html",
+    "title": "Connecting Workbench & Connect to AWS S3",
     "section": "",
-    "text": "Post With Code\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nOct 28, 2024\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nOct 25, 2024\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "You may want to connect your Posit Workbench session to an S3 bucket to pull data from Amazon Web Services (AWS)."
+  },
+  {
+    "objectID": "posts/Connecting-Workbench-Connect-to-AWS-S3/index.html#access-keys",
+    "href": "posts/Connecting-Workbench-Connect-to-AWS-S3/index.html#access-keys",
+    "title": "Connecting Workbench & Connect to AWS S3",
+    "section": "Access Keys",
+    "text": "Access Keys\nThere is an open-source package that allows you to connect your R session to the S3 API. It is useful when connecting your R session to AWS S3.\nTo install the package, you can run the following command in the R terminal:\ninstall.packages(\"aws.s3\")\nFrom there, we can use this library within our session:\nlibrary(aws.s3)\nOnce complete, we need to ensure that we have associated our appropriate RBAC (role-based access control) account to our R session. To do so, you can set the following variables within your environment using the R terminal:\nSys.setenv(\n\"AWS_ACCESS_KEY_ID\" = \"0000000\",\n\"AWS_SECRET_ACCESS_KEY\"= \"000000\",\n\"AWS_DEFAULT_REGION\" = \"us-west-2\",\n\"AWS_SESSION_TOKEN\" = \"0000000\")\nNote that the zeros used in the above are simply placeholders. You will need to replace the values within the quotation marks with the values that correspond to your AWS account. The region used is also a placeholder, you will need to change this if it is different to Oregon (us-west-2)."
   },
   {
     "objectID": "about.html",
@@ -21,10 +35,17 @@
     "text": "About this blog"
   },
   {
-    "objectID": "posts/post-with-code/index.html",
-    "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Cecil’s Data Science Blog",
     "section": "",
-    "text": "This is a post with executable code."
+    "text": "Memory-Based Load Balancing on Posit Workbench\n\n\n\n\n\n\nload balancing\n\n\nmemory\n\n\nlinux\n\n\n\n\n\n\n\n\n\nMay 14, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nTesting Database Connections from the Linux Command Line\n\n\n\n\n\n\ndatabase\n\n\nlinux\n\n\n\n\n\n\n\n\n\nMay 3, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nConnecting Workbench & Connect to AWS S3\n\n\n\n\n\n\nAWS\n\n\nS3\n\n\nR\n\n\n\n\n\n\n\n\n\nFeb 23, 2024\n\n\nCecil Singh\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/memory-load-balancing/index.html",
+    "href": "posts/memory-load-balancing/index.html",
+    "title": "Memory-Based Load Balancing on Posit Workbench",
+    "section": "",
+    "text": "The default load-balancing methods on Posit Workbench largely consider CPU utilization as the determinant for routing between nodes. There may be instances where administrators may wish to uses memory, as opposed to CPU-utilization, to route requests to nodes that are using less RAM. To enable this, set the configuration below in your /etc/rstudio/load-balancer configuration file:\n# /etc/rstudio/load-balancer\n[config] \nbalancer = custom \nFrom there, we will need to set the following directive in /etc/rstudio/rserver.conf:\n# /etc/rstudio/rserver.conf \nserver-health-check-enabled=1 \nFrom there, using your text editor of choice, edit the /usr/lib/rstudio-server/bin/rserver-balancer file with the below:\n#!/usr/bin/Rscript\n\nget_nodes &lt;- function(nodes = Sys.getenv(\"RSTUDIO_NODES\")) {\n  unlist(strsplit(nodes, \",\", fixed = TRUE))\n}\n\nget_health_check &lt;- function(node_address) {\n  con &lt;- url(sprintf(\"http://%s/health-check\", node_address))\n  on.exit(close(con))\n  readLines(con)\n}\n\nparse_health_check &lt;- function(health_check) {\n  fields &lt;- unlist(strsplit(health_check, \"\\n|,\"))\n\n  keys &lt;- sub(\n    \":\",\n    \"\",\n    regmatches(fields, regexpr(\"^[a-z\\\\-]+:\", fields))\n  )\n\n  values &lt;- sub(\n    \": \",\n    \"\",\n    regmatches(fields, regexpr(\":.+$\", fields))\n  )\n  data.frame(keys, values, stringsAsFactors = FALSE)\n}\n\nget_value &lt;- function(hc_table, hc_value) {\n  as.double(hc_table[hc_table[[\"keys\"]] == hc_value, \"values\"])\n}\n\nmain &lt;- function() {\n  nodes &lt;- get_nodes()\n  named_hc &lt;- setNames(lapply(nodes, get_health_check), nodes)\n  parsed_hc &lt;- lapply(named_hc, parse_health_check)\n  mem_percent &lt;- lapply(parsed_hc, get_value, \"memory-percent\")\n  least_mem &lt;- names(which.min(unlist(mem_percent)))\n\n  least_mem\n}\n\ncat(main())\nLastly, restart the Workbench & launcher services for this to take effect:\nsudo rstudio-server restart\nsudo rstudio-server restart"
   }
 ]

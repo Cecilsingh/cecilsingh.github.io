@@ -2,8 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/post-with-code/index.html",
-      "/posts/welcome/index.html"
+      "/posts/memory-load-balancing/index.html",
+      "/posts/db-connections-command-line/index.html",
+      "/posts/Connecting-Workbench-Connect-to-AWS-S3/index.html"
     ]
   }
 ]

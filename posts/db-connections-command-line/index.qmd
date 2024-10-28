@@ -3,7 +3,7 @@ title: "Testing Database Connections from the Linux Command Line"
 author: "Cecil Singh"
 date: "2024-05-3"
 categories: [database, linux]
-image: "image.jpg"
+image: "db.jpg"
 ---
 
 Posit Pro drivers allow you to easily connect your Workbench & Connect servers to external databases. The steps to install these drivers can be found here:

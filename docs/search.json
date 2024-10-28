@@ -14,6 +14,20 @@
     "text": "File: /etc/odbc.ini\n[test]\nDriver = SQLServer\nServer = my.server.name\nDatabase = dbname\nPort = 1433\nTo test this connection, run the following command in the Linux terminal:\nisql -v test"
   },
   {
+    "objectID": "posts/vscode-session-timeouts/index.html",
+    "href": "posts/vscode-session-timeouts/index.html",
+    "title": "VScode Session Timeouts",
+    "section": "",
+    "text": "Currently, there is not a mechanism to timeout VS code sessions natively with directives in Posit configuration files.\nThat said, in the interim, you can set a timeout on the heartbeat file to automatically close sessions after some inactivity. The following GitHub issue contains more information: https://github.com/coder/code-server/issues/1636\nMore information on the heartbeat file itself can be found here: https://coder.com/docs/code-server/latest/FAQ#what-is-the-heartbeat-file\nIn addition, the following GitHub issues track session timeouts within code-server. It’s worth noting that these issues are not monitored or tracked by Posit, however, they provide potental alternatives for setting VS Code session timeouts:\nhttps://github.com/coder/code-server/issues/1274 https://github.com/coder/code-server/issues/5008"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Cecil’s Data Science Blog",
+    "section": "",
+    "text": "Memory-Based Load Balancing on Posit Workbench\n\n\n\n\n\n\nload balancing\n\n\nmemory\n\n\nlinux\n\n\n\n\n\n\n\n\n\nMay 14, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nTesting Database Connections from the Linux Command Line\n\n\n\n\n\n\ndatabase\n\n\nlinux\n\n\n\n\n\n\n\n\n\nMay 3, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nVScode Session Timeouts\n\n\n\n\n\n\nvscode\n\n\n\n\n\n\n\n\n\nMar 13, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nConnecting Workbench & Connect to AWS S3\n\n\n\n\n\n\nAWS\n\n\nS3\n\n\nR\n\n\n\n\n\n\n\n\n\nFeb 23, 2024\n\n\nCecil Singh\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "posts/Connecting-Workbench-Connect-to-AWS-S3/index.html",
     "href": "posts/Connecting-Workbench-Connect-to-AWS-S3/index.html",
     "title": "Connecting Workbench & Connect to AWS S3",
@@ -26,20 +40,6 @@
     "title": "Connecting Workbench & Connect to AWS S3",
     "section": "Access Keys",
     "text": "Access Keys\nThere is an open-source package that allows you to connect your R session to the S3 API. It is useful when connecting your R session to AWS S3.\nTo install the package, you can run the following command in the R terminal:\ninstall.packages(\"aws.s3\")\nFrom there, we can use this library within our session:\nlibrary(aws.s3)\nOnce complete, we need to ensure that we have associated our appropriate RBAC (role-based access control) account to our R session. To do so, you can set the following variables within your environment using the R terminal:\nSys.setenv(\n\"AWS_ACCESS_KEY_ID\" = \"0000000\",\n\"AWS_SECRET_ACCESS_KEY\"= \"000000\",\n\"AWS_DEFAULT_REGION\" = \"us-west-2\",\n\"AWS_SESSION_TOKEN\" = \"0000000\")\nNote that the zeros used in the above are simply placeholders. You will need to replace the values within the quotation marks with the values that correspond to your AWS account. The region used is also a placeholder, you will need to change this if it is different to Oregon (us-west-2)."
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this blog"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Cecil’s Data Science Blog",
-    "section": "",
-    "text": "Memory-Based Load Balancing on Posit Workbench\n\n\n\n\n\n\nload balancing\n\n\nmemory\n\n\nlinux\n\n\n\n\n\n\n\n\n\nMay 14, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nTesting Database Connections from the Linux Command Line\n\n\n\n\n\n\ndatabase\n\n\nlinux\n\n\n\n\n\n\n\n\n\nMay 3, 2024\n\n\nCecil Singh\n\n\n\n\n\n\n\n\n\n\n\n\nConnecting Workbench & Connect to AWS S3\n\n\n\n\n\n\nAWS\n\n\nS3\n\n\nR\n\n\n\n\n\n\n\n\n\nFeb 23, 2024\n\n\nCecil Singh\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/memory-load-balancing/index.html",

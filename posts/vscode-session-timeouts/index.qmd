@@ -1,0 +1,21 @@
+---
+title: "VScode Session Timeouts"
+author: "Cecil Singh"
+date: "2024-03-13"
+categories: [vscode]
+image: "vscode.jpg"
+---
+
+Currently, there is not a mechanism to timeout VS code sessions natively with directives in Posit configuration files. 
+ 
+That said, in the interim, you can set a timeout on the heartbeat file to automatically close sessions after some inactivity. The following GitHub issue contains more information:
+https://github.com/coder/code-server/issues/1636
+ 
+More information on the heartbeat file itself can be found here:
+https://coder.com/docs/code-server/latest/FAQ#what-is-the-heartbeat-file
+
+In addition, the following GitHub issues track session timeouts within code-server. It's worth noting that these issues are not monitored or tracked by Posit, however, they provide potental alternatives for setting VS Code session timeouts:
+
+https://github.com/coder/code-server/issues/1274
+https://github.com/coder/code-server/issues/5008
+

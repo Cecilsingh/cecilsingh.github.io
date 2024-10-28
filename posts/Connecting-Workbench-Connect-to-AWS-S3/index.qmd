@@ -3,7 +3,7 @@ title: "Connecting Workbench & Connect to AWS S3"
 author: "Cecil Singh"
 date: "2024-02-23"
 categories: [AWS, S3, R]
-image: "image.jpg"
+image: "bucket.jpg"
 ---
 
 You may want to connect your Posit Workbench session to an S3 bucket to pull data from Amazon Web Services (AWS). 

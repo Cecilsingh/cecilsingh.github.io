@@ -1,0 +1,36 @@
+---
+title: "Testing Database Connections from the Linux Command Line"
+author: "Cecil Singh"
+date: "2024-05-3"
+categories: [database, linux]
+image: "image.jpg"
+---
+
+Posit Pro drivers allow you to easily connect your Workbench & Connect servers to external databases. The steps to install these drivers can be found here:
+https://docs.posit.co/pro-drivers/workbench-connect/
+
+Your best option is to isolate the product, and try to connect to your database natively from the command line. You can test connections by running *isql*, which is a command line tool for interactive SQL queries. To do so, you will need to create an *odbc.ini* file in the `/etc` directory. 
+
+To create a new DSN:
+1. Edit the `/etc/odbc.ini` file.
+2. Add a new entry for your desired database type by copying over the sample from `/opt/rstudio-drivers/odbc.ini.sample`.
+3. Ensure that the Driver setting in the DSN refers to the corresponding driver name or path listed in `/etc/odbcinst.ini`.
+4. Modify the entry with your desired connection parameters
+
+For example, to add a SQL Server connection:
+
+## File: /etc/odbc.ini
+
+```default
+[test]
+Driver = SQLServer
+Server = my.server.name
+Database = dbname
+Port = 1433
+```
+To test this connection, run the following command in the Linux terminal:
+```default
+isql -v test
+```
+
+

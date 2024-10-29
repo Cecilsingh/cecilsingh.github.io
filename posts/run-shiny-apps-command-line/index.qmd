@@ -1,0 +1,73 @@
+---
+title: "Run Shiny Applications natively via the Linux command line"
+author: "Cecil Singh"
+date: "2024-02-20"
+categories: [Linux, Shiny, R]
+image: "shiny.jpg"
+---
+
+You may wish to run Shiny apps natively via the command line to help isolate code-related issues when when working with Posit Workbench or Posit Connect. Formally speaking, code-related questions are outside of our support SLA! However, running code natively via the command line can help identify if issues are within code or within the product. Rscript allows you to test shiny applications and run them via the R command line. The following documentation contains more information on this:
+
+https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/Rscript
+https://support.posit.co/hc/en-us/articles/218012917
+
+## Example Usage
+
+First, let's create our Shiny Web Application. For this example, we will be using a single file application (app.R), however, multiple file web applications can be used (ui.R, and server.R). The file is located in /home/posit/testapp/app.R. The content of this application can be seen below:
+
+```default
+library(shiny)
+# Global variables can go here
+n <- 200
+
+
+# Define the UI
+ui <- bootstrapPage(
+  numericInput('n', 'Number of Jobs', n),
+  plotOutput('plot')
+)
+
+
+# Define the server code
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    hist(runif(input$n))
+  })
+}
+
+# Return a Shiny app object
+shinyApp(ui = ui, server = server)
+```
+Once we have our application built, we can run this from the Linux command line using Rscript:
+
+```default
+Cecil@RStudio:~# R -e "shiny::runApp('/home/posit/testapp')"
+```
+This will run your code natively via the R command line:
+
+```default
+Cecil@PositWorkbench:~# R -e "shiny::runApp('/home/posit/testapp')"
+
+R version 4.1.2 (2021-11-01) -- "Bird Hippie"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> shiny::runApp('/home/posit/testapp')
+Loading required package: shiny
+
+Listening on http://127.0.0.1:5772
+```
+In this instance, 5772 is the port provided, however, this will be different for your specific application. Paste the URL into your web browser and you will be able to see your application presented.
+

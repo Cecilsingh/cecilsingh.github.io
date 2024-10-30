@@ -1,7 +1,7 @@
 ---
 title: "Testing Database Connections from the Linux Command Line"
 author: "Cecil Singh"
-date: "2024-05-3"
+date: "2023-05-3"
 categories: [database, linux]
 image: "db.jpg"
 ---

@@ -1,0 +1,116 @@
+---
+title: "SQLite Backup & Restore Scripts"
+author: "Cecil Singh"
+date: "2024-09-30"
+categories: [script, database]
+image: "sqlite.jpg"
+---
+Backup and Restore scripts for SQLite databases
+
+### Python
+```python
+#Import the SQLite3 package for SQLite3 manipulation.
+import sqlite3
+#Import shutil package for file operations.
+import shutil
+
+#Specify database file paths.
+#This is hard-coded. In this instance, the SQLite directory will need to be adjusted. The backup directory is in the same path, however, appended with .bak.
+source_db_filename = '/path/to/file.sqlite'
+backup_db_filename = '/path/to/file.sqlite.bk'
+
+#Create a function that backs up the SQLite databases as specifed above.
+def backup_database():
+    #Try-catch exception.
+    try:
+        #copy2 allows us to preserve all file metadata. copy() would copy the file data and permissions.
+        shutil.copy2(source_db_filename, backup_db_filename)
+        #Print success if backup is successful.
+        print("Backup successful.")
+    #If the backup fails, let the user know.
+    except Exception as e:
+        print(f"Backup failed: {str(e)}")
+
+#Function to restore the database above from a backup
+def restore_database():
+    #Try-catch exception
+    try:
+        #copy2 allows us to preserve all file metadata. copy() would copy the file data and permissions.
+        shutil.copy2(backup_db_filename, source_db_filename)
+        #Print success if restoration is successful.
+        print("Restore successful.")
+    #If the backup fails, let the user know.
+    except Exception as e:
+        print(f"Restore failed: {str(e)}")
+
+#Allows the script to NOT be hard-coded. The user can select which options they would like.
+#Display user options.
+while True:
+    print("Options:")
+    print("1. Backup Database")
+    print("2. Restore Database")
+    print("3. Quit")
+    userSelection = input("Enter your userSelection. Specify 1, 2 or 3: ")
+
+    #Conditionals
+    if userSelection == '1':
+        backup_database()
+    elif userSelection == '2':
+        restore_database()
+    elif userSelection == '3':
+        break
+    else:
+        print("Invalid userSelection. Please enter 1, 2, or 3.")
+``` 
+
+### Bash
+
+```bash
+#!/bin/bash
+
+#Define database file paths
+source_db_filename="/path/to/file.sqlite"
+backup_db_filename="/path/to/file.sqlite.bk"
+
+#Function to backup the database
+backup_database() {
+    if cp -p "$source_db_filename" "$backup_db_filename"; then
+        echo "Backup successful."
+    else
+        echo "Backup failed."
+    fi
+}
+
+#Function to restore the database
+restore_database() {
+    if cp -p "$backup_db_filename" "$source_db_filename"; then
+        echo "Restore successful."
+    else
+        echo "Restore failed."
+    fi
+}
+
+#Loop through the main menu
+while true; do
+    echo "Options:"
+    echo "1. Backup Database"
+    echo "2. Restore Database"
+    echo "3. Quit"
+    read -p "Enter your selection (1, 2, or 3): " userSelection
+
+    case $userSelection in
+        1)
+            backup_database
+            ;;
+        2)
+            restore_database
+            ;;
+        3)
+            break
+            ;;
+        *)
+            echo "Invalid selection. Please enter 1, 2, or 3."
+            ;;
+    esac
+done
+```

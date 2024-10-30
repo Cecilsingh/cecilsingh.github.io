@@ -1,0 +1,78 @@
+---
+title: "SSL with Posit Workbench + Launcher"
+author: "Cecil Singh"
+date: "2021-11-26"
+categories: [SSL, Workbench, Launcher]
+image: "ssl.jpg"
+---
+
+It's possible to use an SSL certificate with the launcher in Posit Workbench. This may seem appealing, but what does this mean and how does it affect the interactions with Posit Workbench?
+
+## Can I use the same SSL for my Posit Workbench server, for the launcher?
+
+Yes, however, it is strongly recommended & a best practice to ensure that the Launcher certificates are different from those used for Posit Server. The reason for this, is because typically, the Common Name(CN) for an SSL certificate will usually be specific to the name of the server that you're using the certificate for (disregarding wildcard certificates and SAN certificates here). In most cases, Workbench will be available externally to the machine itself and can have an external-facing DNS name unique to your organization. For example, my-org.rsw-hostname.com. In this scenario, the server will likely be running on my-org.rsw-hostname.com, however, the launcher will be running on localhost. In this case, your server certificates CN will be my-org.rsw-hostname.com, and your Launcher certificates CN will be localhost.
+
+You can use both the server and launcher on the same domain name so that they can share certificates, however, we wouldn't recommend this as best practice.
+
+### Launcher with SSL Explained
+
+Consider the following diagram:
+
+```default
+                 (a)           (b)
+Browser (User) <------> RSP <------> Launcher
+                         ^
+                         | (c)
+                         v
+                     R Session                         
+```
+
+* **(a)** represents the communication between the Browser and Posit Server itself.
+* **(b)** represents the communication between Posit Server and the Posit Job Launcher.
+* **(c)** represents the communication between the RSession and the Posit Job Launcher. (Note: The Launcher starts the session in the backend, such as Slurm or Kubernetes, but does not communicate with the session directly).
+
+All three lines of communication are over HTTP/S. The R Session communicates with the R session (c) the same way that a browser communicates with Posit Server (a). The R Session discovers the address with which to communicate with the server via the launcher-sessions-callback-address​ setting, which is why the setting needs to be exactly the same as what you would enter into the browser.
+
+The settings that pertain to the encryption of (a) and (c) are as follows, that is, enabling HTTPS for communication with Posit Server:
+
+```default
+/etc/rstudio/rserver.conf:
+ssl-enabled=1
+ssl-certificate=</path/to/server/cert.pem> 
+ssl-certificate-key=</path/to/server/key.pem>
+```
+
+Additionally, the following settings are relevant to the configuration of HTTPS for (a) and (c), but not strictly required for enabling it:
+
+```default
+/etc/rstudio/rserver.conf:
+www-address=<my-org.rsp-hostname.com>
+www-port=<port#, default 443 if ssl-enabled=1>
+launcher-sessions-callback-address=<https://my-org.rsp-hostname.com[:port#]>
+```
+
+In addition to the requirement that certificates defined in rserver.conf​ are added to the trusted certificate store of the host, they must have been generated with the correct Common Name​ (or CN​) matching the hostname of Workbench (most likely the same value as the www-address​), and the files must have restrictive permissions (root:root 400​). Additionally, the CA root must be trusted by any machines within your network that will access Workbench. For example, a user's machines as well as Slurm compute nodes that will run R sessions. 
+
+
+The settings that pertain to the encryption of (b) are as follows (i.e. to enable HTTPS for communication between Posit Server and the Launcher):
+
+```default
+/etc/rstudio/rserver.conf:
+launcher-use-ssl=1
+launcher-address=<launcher hostname or IP>
+launcher-port=<port#>
+
+/etc/rstudio/launcher.conf:
+enable-ssl=[0|1]
+certificate-file=</path/to/launcher/cert.pem>
+certificate-key-file=</path/to/launcher/key.pem>
+address=<launcher hostname or IP>
+port=<port#>
+```
+Note that the values of launcher-use-ssl​, launcher-address​, and launcher-port​ in rserver.conf​ should match the values of enable-ssl​, address​, and port​ in launcher.conf​ respectively. Also, note the lack of http://​ or https://​ in front of the launcher-address​ value. The protocol for communication is determined by the value of launcher-use-ssl​.
+
+
+The Launcher certificates must be different certificates from those used for Posit Workbench. The correct CN ​for the Launcher's certificates is the value of address​ in launcher.conf​. If Posit Workbench and the Launcher will be running on the same machine, localhost​ may be used. Another difference from the Posit Workbench certificates is that the Launcher certificates should be owned by the server-user​ and admin-group ​and defined in launcher.conf​. For example, if those values were left as they are on installation (both rstudio-server​) then the certificate files for the Launcher should have the permissions rstudio-server:rstudio-server 400​.
+
+
+

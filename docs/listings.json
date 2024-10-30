@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/sqlite-script/index.html",
       "/posts/memory-load-balancing/index.html",
       "/posts/db-connections-command-line/index.html",
       "/posts/vscode-session-timeouts/index.html",

@@ -86,11 +86,12 @@ spec:
     name: nginx
   restartPolicy: Always
 ```
-| apiVersion 	|         The version of the Kubernetes API to use         	|
-|:----------:	|:--------------------------------------------------------:	|
-|    kind    	|           The type of object you wish to create          	|
-|  metadata  	| The type of data that helps uniquely identify the object 	|
-|    spec    	|   The specification of how you want the pod configured   	|
+| Specification 	|                         Descriptor                         	|
+|:-------------:	|:----------------------------------------------------------:	|
+|   apiVersion  	|         _The version of the Kubernetes API to use_         	|
+|      kind     	|           _The type of object you wish to create_          	|
+|    metadata   	| _The type of data that helps uniquely identify the object_ 	|
+|      spec     	|   _The specification of how you want the pod configured_   	|
 
 Save the file, and then apply the default configuration to use the yaml file that you created:
 

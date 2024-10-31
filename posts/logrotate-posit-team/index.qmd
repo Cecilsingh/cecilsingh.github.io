@@ -1,0 +1,33 @@
+---
+title: "Logrotate with Posit Teams"
+author: "Cecil Singh"
+date: "2023-01-25"
+categories: [linux, logging]
+image: "logrotate.jpg"
+---
+
+You may wish to rotate the logs on your Posit Workbench, Package Manager, or Connect server. Whether to keep log files small, or to pass these files into third party solutions, it helps to know how this can be achieved.
+
+Largely, this involves creating new entries in your */etc/logrotate.conf* file for the log file that you wish to rotate. Then, you can use the create function which follows the following syntax:
+
+```default
+create [mode] [user] [group]
+```
+For example, if you wanted to set 644 permissions on rstudio-connect.log , for both the rstudio-connect user & group, then you would set the following in your /etc/logrotate.conf:
+
+```default
+/var/log/rstudio/rstudio-connect/rstudio-connect.log { 
+rotate 30 
+daily 
+copytruncate 
+compress 
+delaycompress 
+notifempty 
+missingok 
+su root root 
+create 644 rstudio-connect rstudio-connect
+}
+```
+More information on this can be found here:
+https://linux.die.net/man/8/logrotate
+

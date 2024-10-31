@@ -1,0 +1,111 @@
+---
+title: "Troubleshooting Kubernetes Pods on AWS"
+author: "Cecil Singh"
+date: "2021-12-21"
+categories: [AWS, Kubernetes, Linux]
+image: "container.jpg"
+---
+
+## AWS Access
+Ensure that you have command-line access to the AWS console to access your AWS resources. You can use the AWS CLI tool through your terminal to verify this. You can run the command below to confirm if you are correctly connected to your AWS account:
+
+```bash
+aws sts get-caller-identity
+```
+You must also specify the name & region of your EKS cluster:
+
+```bash
+aws eks --region xx-xxxx-x update-kubeconfig --name xxxxxxxx
+```
+
+For example:
+
+```bash
+aws eks --region us-east-1 update-kubeconfig --name Rstudio-EKS
+```
+
+It also helps to set your namespace to the default namespace that you will be using:
+
+```bash
+kubectl config set-context --current --namespace=NAMESPACE
+```
+
+For example:
+```bash
+kubectl config set-context --current --namespace=rstudio
+```
+## Troubleshooting Launched Pods
+
+let's check to see if we can access the Kubernetes API by launching a Kubernetes pod from our local server to our Kubernetes cluster. You can run the command below to see previously launched pods:
+
+```bash
+kubectl get pods
+```
+If you have launched pods that you are having issues connecting to, you can run the command below for a more detailed description of which stage the pod is in, as well as any errors that may be associated with its launch:
+
+```bash
+kubectl describe pod <podname>
+```
+
+Where <podname> is the name of your Kubernetes pods, obtained by running *kubectl get pods*. For example:
+
+```bash
+kubectl describe pod testpod
+```
+
+## Launching a test pod
+
+You can launch a test pod to help narrow down connection issues when a pod is created. This will confirm that our localhost can launch pods into our Kubernetes cluster. The easiest way to do so, is to use *kubectl* to create a pod. Let's create one called nginx:
+
+```bash
+kubectl run nginx --image=nginx
+```
+
+Alternatively, you can create a file containing the yaml that you would like to create your pod with. You can create this file by running the below:
+
+```bash
+sudo touch pod.yaml
+```
+
+The contents of this file will contain the yaml configuration that you will use to launch the test pod. I've attached a sample configuration here:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: testing
+spec:
+  containers:
+  - image: nginx:latest
+    command:
+      - "sleep"
+      - "604800"
+    imagePullPolicy: IfNotPresent
+    name: nginx
+  restartPolicy: Always
+```
+| apiVersion 	|         The version of the Kubernetes API to use         	|
+|:----------:	|:--------------------------------------------------------:	|
+|    kind    	|           The type of object you wish to create          	|
+|  metadata  	| The type of data that helps uniquely identify the object 	|
+|    spec    	|   The specification of how you want the pod configured   	|
+
+Save the file, and then apply the default configuration to use the yaml file that you created:
+
+```bash
+kubectl apply -f pod.yaml
+```
+
+When running this command, you should see confirmation that the pod has been launched:
+
+```bash
+cecil@localhost:~$ kubectl apply -f pod.yaml
+pod/nginx created
+```
+Once the pod has been created, you can SSH into the running pod by using the command below:
+
+```bash
+kubectl exec -it nginx -- /bin/bash
+```

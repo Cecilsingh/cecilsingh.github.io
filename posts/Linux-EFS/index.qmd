@@ -1,7 +1,7 @@
 ---
 title: "Connecting your Linux host to AWS EFS"
 author: "Cecil Singh"
-date: "2021-12-21"
+date: "2021-12-03"
 categories: [AWS, EFS, Storage]
 image: "efs.jpg"
 ---

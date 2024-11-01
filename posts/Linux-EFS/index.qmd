@@ -1,0 +1,72 @@
+---
+title: "Connecting your Linux host to AWS EFS"
+author: "Cecil Singh"
+date: "2021-12-21"
+categories: [AWS, EFS, Storage]
+image: "efs.jpg"
+---
+
+## Assumptions
+This guide assumes that you are familiar with the AWS console, and that you have configured an EFS file system as per the guide below:
+
+https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html
+
+## Mounting your EFS Share
+
+First, we need to make an EFS folder in the root directory:
+
+```bash
+cd /
+```
+
+```bash
+sudo mkdir efs
+```
+
+From here, we need to install the NFS client to connect the current server to the EFS share. The command used will defer depending on Linux distribution:
+
+### Ubuntu/Debian
+
+```bash
+sudo apt-get -y install nfs-common
+```
+
+
+### Redhat/CentOS
+
+```bash
+yum install nfs-utils
+```
+From here, you can mount your EFS share to your server. You can select the "attach" button on the top-right hand corner of the file-systems page which will give you a link to connect. Alternatively, you can use something like this:
+
+```bash
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <hostname or IP Address here>:/ efs
+```
+|     Option     	|                                                                                                                                                                      Result                                                                                                                                                                     	|
+|:--------------:	|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:	|
+|   **nfsvers**  	| _Specifies which version of the NFS protocol to use._                                                                                                                                                                                                                                                                                           	|
+|    **rsize**   	| _The maximum number of bytes in each network READ request that the NFS client can receive when reading data from a file on an NFS server. This is set to the maximum allowed value in the example above._                                                                                                                                       	|
+|    **wsize**   	| _The maximum number of bytes per network WRITE request that the NFS client can send when writing data to a file on an NFS server. This is set to the maximum allowed value in the example above._                                                                                                                                               	|
+|    **hard**    	| _Specifies whether the program using a file via an NFS connection should stop and wait (hard) for the server to come back online, if the host serving the exported file system is unavailable, or if it should report an error (soft)._                                                                                                         	|
+|    **timeo**   	| _The time in deciseconds (tenths of a second) the NFS client waits for a response before it retries an NFS request._                                                                                                                                                                                                                            	|
+|   **retrans**  	| _The number of times the NFS client retries a request before it attempts further recovery action. If the retrans option is not specified, the NFS client tries each request three times._                                                                                                                                                       	|
+| **norevsport** 	| _Specifies whether the NFS client should use a privileged source port when communicating with an NFS server for this mount point. If this option is not specified, or the resvport option is specified, the NFS client uses a privileged source port. If the noresvport option is specified, the NFS client uses a non-privileged source port._ 	|
+
+*NOTE: You will need to replace <hostname or IP address here> with your EFS servers IP address or hostname. It is important to allow your EFS client server IP address as an inbound firewall rule on your EFS cluster. It is also crucial to ensure that you have your EFS instance as an inbound firewall rule on your EFS client server.*
+
+You can check your mount points by running the command below:
+
+```bash
+df -h
+```
+
+You can test connectivity to your EFS share by going into your EFS directory and creating a test file. The example below creates a 30mb text file that you can use to verify data transfer to your shared directory:
+
+```bash
+cd /
+```
+
+```bash
+sudo dd if=/dev/zero of=file.out bs=1MB count=30
+```
+If you can create that file, then you have the permissions to write to your EFS share.

@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Cecil Singh">
-<meta name="dcterms.date" content="2023-02-23">
+<meta name="dcterms.date" content="2021-12-21">
 
-<title>Cecil’s Data Science Blog - Connecting Workbench &amp; Connect to AWS S3</title>
+<title>Cecil’s Data Science Blog - Connecting your Linux host to AWS EFS</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -149,11 +149,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Connecting Workbench &amp; Connect to AWS S3</h1>
+      <h1 class="title">Connecting your Linux host to AWS EFS</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">AWS</div>
-                <div class="quarto-category">S3</div>
-                <div class="quarto-category">R</div>
+                <div class="quarto-category">EFS</div>
+                <div class="quarto-category">Storage</div>
               </div>
                   </div>
   </div>
@@ -171,7 +171,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">February 23, 2023</p>
+        <p class="date">December 21, 2021</p>
       </div>
     </div>
     
@@ -190,40 +190,146 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>You may want to connect your Posit Workbench session to an S3 bucket to pull data from Amazon Web Services (AWS).</p>
-<section id="connecting-to-s3" class="level1">
-<h1>Connecting to S3</h1>
-<section id="access-keys" class="level2">
-<h2 class="anchored" data-anchor-id="access-keys">Access Keys</h2>
-<p>There is an open-source package that allows you to connect your R session to the S3 API. It is useful when connecting your R session to AWS S3.</p>
-<p>To install the package, you can run the following command in the R terminal:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>install.packages("aws.s3")</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>From there, we can use this library within our session:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>library(aws.s3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Once complete, we need to ensure that we have associated our appropriate RBAC (role-based access control) account to our R session. To do so, you can set the following variables within your environment using the R terminal:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Sys.setenv(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>"AWS_ACCESS_KEY_ID" = "0000000",</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>"AWS_SECRET_ACCESS_KEY"= "000000",</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>"AWS_DEFAULT_REGION" = "us-west-2",</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>"AWS_SESSION_TOKEN" = "0000000")</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that the zeros used in the above are simply placeholders. You will need to replace the values within the quotation marks with the values that correspond to your AWS account. The region used is also a placeholder, you will need to change this if it is different to Oregon (us-west-2).</p>
+<section id="assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
+<p>This guide assumes that you are familiar with the AWS console, and that you have configured an EFS file system as per the guide below:</p>
+<p>https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html</p>
+<p>While using the configuration specified here:</p>
+<p>https://docs.rstudio.com/rstudio-team/integration/efs/</p>
+</section>
+<section id="mounting-your-efs-share" class="level2">
+<h2 class="anchored" data-anchor-id="mounting-your-efs-share">Mounting your EFS Share</h2>
+<p>First, we need to make an EFS folder in the root directory:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir efs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>From here, we need to install the NFS client to connect the current server to the EFS share. The command used will defer depending on Linux distribution:</p>
+<section id="ubuntudebian" class="level3">
+<h3 class="anchored" data-anchor-id="ubuntudebian">Ubuntu/Debian</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get <span class="at">-y</span> install nfs-common</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="redhatcentos" class="level3">
+<h3 class="anchored" data-anchor-id="redhatcentos">Redhat/CentOS</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">yum</span> install nfs-utils</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>From here, you can mount your EFS share to your server. You can select the “attach” button on the top-right hand corner of the file-systems page which will give you a link to connect. Alternatively, you can use something like this:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">-t</span> nfs4 <span class="at">-o</span> nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <span class="op">&lt;</span>hostname or IP Address here<span class="op">&gt;</span>:/ efs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<table class="table">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 96%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Option</th>
+<th style="text-align: center;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">nfsvers</td>
+<td style="text-align: center;">Specifies which version of the NFS protocol to use.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">rsize</td>
+<td style="text-align: center;">The maximum number of bytes in each network READ request that the NFS client can receive when reading data from a file on an NFS server. This is set to the maximum allowed value in the example above.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">wsize</td>
+<td style="text-align: center;">The maximum number of bytes per network WRITE request that the NFS client can send when writing data to a file on an NFS server. This is set to the maximum allowed value in the example above.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">hard</td>
+<td style="text-align: center;">Specifies whether the program using a file via an NFS connection should stop and wait (hard) for the server to come back online, if the host serving the exported file system is unavailable, or if it should report an error (soft).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">timeo</td>
+<td style="text-align: center;">The time in deciseconds (tenths of a second) the NFS client waits for a response before it retries an NFS request.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">retrans</td>
+<td style="text-align: center;">The number of times the NFS client retries a request before it attempts further recovery action. If the retrans option is not specified, the NFS client tries each request three times.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">norevsport</td>
+<td style="text-align: center;">Specifies whether the NFS client should use a privileged source port when communicating with an NFS server for this mount point. If this option is not specified, or the resvport option is specified, the NFS client uses a privileged source port. If the noresvport option is specified, the NFS client uses a non-privileged source port.</td>
+</tr>
+</tbody>
+</table>
+<p>For example:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> eks <span class="at">--region</span> us-east-1 update-kubeconfig <span class="at">--name</span> Rstudio-EKS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It also helps to set your namespace to the default namespace that you will be using:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> config set-context <span class="at">--current</span> <span class="at">--namespace</span><span class="op">=</span>NAMESPACE</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For example:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> config set-context <span class="at">--current</span> <span class="at">--namespace</span><span class="op">=</span>rstudio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
-<section id="iam-role" class="level1">
-<h1>IAM Role</h1>
-<p>A solution to using an IAM role may be to use the aws.s3 and aws.ec2metadata packages. This package pulls EC2 instance metadata from within the running instance. It’s worth noting that this requires the EC2 host to have access to the AWS CLI which can be installed as specified by AWS here:</p>
-<p>https://aws.amazon.com/cli/</p>
-<p>Once installed, you can verify that you’re connected to your AWS account via the linux command line by running:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>aws sts get-caller-identity</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Once verified, you can connect your R session to instance metadata. To do so, you will first need to install the aws.s3 and aws.ec2metadata packages. You can do this by running the commands below:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>install.packages("aws.s3")</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>install.packages("aws.ec2metadata")</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>library(aws.s3)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>library(aws.ec2metadata)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Sys.setenv("AWS_DEFAULT_REGION" = 'us-east-1')</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>In the code block above, us-east-1 is an example - you will need to change this value to suit your S3 environment.</p>
-<p>Testing Once you’ve run the commands above, you can begin pulling data from S3! You can start by listing your buckets using the command below:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bucketlist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="troubleshooting-launched-pods" class="level2">
+<h2 class="anchored" data-anchor-id="troubleshooting-launched-pods">Troubleshooting Launched Pods</h2>
+<p>let’s check to see if we can access the Kubernetes API by launching a Kubernetes pod from our local server to our Kubernetes cluster. You can run the command below to see previously launched pods:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get pods</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you have launched pods that you are having issues connecting to, you can run the command below for a more detailed description of which stage the pod is in, as well as any errors that may be associated with its launch:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe pod <span class="op">&lt;</span>podname<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Where <podname> is the name of your Kubernetes pods, obtained by running <em>kubectl get pods</em>. For example:</podname></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe pod testpod</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="launching-a-test-pod" class="level2">
+<h2 class="anchored" data-anchor-id="launching-a-test-pod">Launching a test pod</h2>
+<p>You can launch a test pod to help narrow down connection issues when a pod is created. This will confirm that our localhost can launch pods into our Kubernetes cluster. The easiest way to do so, is to use <em>kubectl</em> to create a pod. Let’s create one called nginx:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> run nginx <span class="at">--image</span><span class="op">=</span>nginx</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Alternatively, you can create a file containing the yaml that you would like to create your pod with. You can create this file by running the below:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> touch pod.yaml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The contents of this file will contain the yaml configuration that you will use to launch the test pod. I’ve attached a sample configuration here:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apiVersion</span><span class="kw">:</span><span class="at"> v1</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kind</span><span class="kw">:</span><span class="at"> Pod</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> nginx</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">labels</span><span class="kw">:</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">app</span><span class="kw">:</span><span class="at"> testing</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">spec</span><span class="kw">:</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">containers</span><span class="kw">:</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">image</span><span class="kw">:</span><span class="at"> nginx:latest</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"sleep"</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"604800"</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">imagePullPolicy</span><span class="kw">:</span><span class="at"> IfNotPresent</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> nginx</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">restartPolicy</span><span class="kw">:</span><span class="at"> Always</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<table class="table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 80%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Specification</th>
+<th style="text-align: center;">Descriptor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">apiVersion</td>
+<td style="text-align: center;"><em>The version of the Kubernetes API to use</em></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">kind</td>
+<td style="text-align: center;"><em>The type of object you wish to create</em></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">metadata</td>
+<td style="text-align: center;"><em>The type of data that helps uniquely identify the object</em></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">spec</td>
+<td style="text-align: center;"><em>The specification of how you want the pod configured</em></td>
+</tr>
+</tbody>
+</table>
+<p>Save the file, and then apply the default configuration to use the yaml file that you created:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> apply <span class="at">-f</span> pod.yaml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When running this command, you should see confirmation that the pod has been launched:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cecil@localhost:~$</span> kubectl apply <span class="at">-f</span> pod.yaml</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pod/nginx</span> created</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Once the pod has been created, you can SSH into the running pod by using the command below:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> exec <span class="at">-it</span> nginx <span class="at">--</span> /bin/bash</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>

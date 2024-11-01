@@ -194,8 +194,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
 <p>This guide assumes that you are familiar with the AWS console, and that you have configured an EFS file system as per the guide below:</p>
 <p>https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html</p>
-<p>While using the configuration specified here:</p>
-<p>https://docs.rstudio.com/rstudio-team/integration/efs/</p>
 </section>
 <section id="mounting-your-efs-share" class="level2">
 <h2 class="anchored" data-anchor-id="mounting-your-efs-share">Mounting your EFS Share</h2>
@@ -214,8 +212,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mount <span class="at">-t</span> nfs4 <span class="at">-o</span> nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <span class="op">&lt;</span>hostname or IP Address here<span class="op">&gt;</span>:/ efs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <table class="table">
 <colgroup>
-<col style="width: 3%">
-<col style="width: 96%">
+<col style="width: 4%">
+<col style="width: 95%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -225,113 +223,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">nfsvers</td>
-<td style="text-align: center;">Specifies which version of the NFS protocol to use.</td>
+<td style="text-align: center;"><strong>nfsvers</strong></td>
+<td style="text-align: center;"><em>Specifies which version of the NFS protocol to use.</em></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">rsize</td>
-<td style="text-align: center;">The maximum number of bytes in each network READ request that the NFS client can receive when reading data from a file on an NFS server. This is set to the maximum allowed value in the example above.</td>
+<td style="text-align: center;"><strong>rsize</strong></td>
+<td style="text-align: center;"><em>The maximum number of bytes in each network READ request that the NFS client can receive when reading data from a file on an NFS server. This is set to the maximum allowed value in the example above.</em></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">wsize</td>
-<td style="text-align: center;">The maximum number of bytes per network WRITE request that the NFS client can send when writing data to a file on an NFS server. This is set to the maximum allowed value in the example above.</td>
+<td style="text-align: center;"><strong>wsize</strong></td>
+<td style="text-align: center;"><em>The maximum number of bytes per network WRITE request that the NFS client can send when writing data to a file on an NFS server. This is set to the maximum allowed value in the example above.</em></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">hard</td>
-<td style="text-align: center;">Specifies whether the program using a file via an NFS connection should stop and wait (hard) for the server to come back online, if the host serving the exported file system is unavailable, or if it should report an error (soft).</td>
+<td style="text-align: center;"><strong>hard</strong></td>
+<td style="text-align: center;"><em>Specifies whether the program using a file via an NFS connection should stop and wait (hard) for the server to come back online, if the host serving the exported file system is unavailable, or if it should report an error (soft).</em></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">timeo</td>
-<td style="text-align: center;">The time in deciseconds (tenths of a second) the NFS client waits for a response before it retries an NFS request.</td>
+<td style="text-align: center;"><strong>timeo</strong></td>
+<td style="text-align: center;"><em>The time in deciseconds (tenths of a second) the NFS client waits for a response before it retries an NFS request.</em></td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">retrans</td>
-<td style="text-align: center;">The number of times the NFS client retries a request before it attempts further recovery action. If the retrans option is not specified, the NFS client tries each request three times.</td>
+<td style="text-align: center;"><strong>retrans</strong></td>
+<td style="text-align: center;"><em>The number of times the NFS client retries a request before it attempts further recovery action. If the retrans option is not specified, the NFS client tries each request three times.</em></td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">norevsport</td>
-<td style="text-align: center;">Specifies whether the NFS client should use a privileged source port when communicating with an NFS server for this mount point. If this option is not specified, or the resvport option is specified, the NFS client uses a privileged source port. If the noresvport option is specified, the NFS client uses a non-privileged source port.</td>
+<td style="text-align: center;"><strong>norevsport</strong></td>
+<td style="text-align: center;"><em>Specifies whether the NFS client should use a privileged source port when communicating with an NFS server for this mount point. If this option is not specified, or the resvport option is specified, the NFS client uses a privileged source port. If the noresvport option is specified, the NFS client uses a non-privileged source port.</em></td>
 </tr>
 </tbody>
 </table>
-<p>For example:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> eks <span class="at">--region</span> us-east-1 update-kubeconfig <span class="at">--name</span> Rstudio-EKS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>It also helps to set your namespace to the default namespace that you will be using:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> config set-context <span class="at">--current</span> <span class="at">--namespace</span><span class="op">=</span>NAMESPACE</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>For example:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> config set-context <span class="at">--current</span> <span class="at">--namespace</span><span class="op">=</span>rstudio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-</section>
-<section id="troubleshooting-launched-pods" class="level2">
-<h2 class="anchored" data-anchor-id="troubleshooting-launched-pods">Troubleshooting Launched Pods</h2>
-<p>let’s check to see if we can access the Kubernetes API by launching a Kubernetes pod from our local server to our Kubernetes cluster. You can run the command below to see previously launched pods:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get pods</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>If you have launched pods that you are having issues connecting to, you can run the command below for a more detailed description of which stage the pod is in, as well as any errors that may be associated with its launch:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe pod <span class="op">&lt;</span>podname<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Where <podname> is the name of your Kubernetes pods, obtained by running <em>kubectl get pods</em>. For example:</podname></p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe pod testpod</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="launching-a-test-pod" class="level2">
-<h2 class="anchored" data-anchor-id="launching-a-test-pod">Launching a test pod</h2>
-<p>You can launch a test pod to help narrow down connection issues when a pod is created. This will confirm that our localhost can launch pods into our Kubernetes cluster. The easiest way to do so, is to use <em>kubectl</em> to create a pod. Let’s create one called nginx:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> run nginx <span class="at">--image</span><span class="op">=</span>nginx</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Alternatively, you can create a file containing the yaml that you would like to create your pod with. You can create this file by running the below:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> touch pod.yaml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The contents of this file will contain the yaml configuration that you will use to launch the test pod. I’ve attached a sample configuration here:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apiVersion</span><span class="kw">:</span><span class="at"> v1</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kind</span><span class="kw">:</span><span class="at"> Pod</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> nginx</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">labels</span><span class="kw">:</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">app</span><span class="kw">:</span><span class="at"> testing</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">spec</span><span class="kw">:</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">containers</span><span class="kw">:</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">image</span><span class="kw">:</span><span class="at"> nginx:latest</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"sleep"</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"604800"</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">imagePullPolicy</span><span class="kw">:</span><span class="at"> IfNotPresent</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> nginx</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">restartPolicy</span><span class="kw">:</span><span class="at"> Always</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<table class="table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 80%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: center;">Specification</th>
-<th style="text-align: center;">Descriptor</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">apiVersion</td>
-<td style="text-align: center;"><em>The version of the Kubernetes API to use</em></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">kind</td>
-<td style="text-align: center;"><em>The type of object you wish to create</em></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">metadata</td>
-<td style="text-align: center;"><em>The type of data that helps uniquely identify the object</em></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">spec</td>
-<td style="text-align: center;"><em>The specification of how you want the pod configured</em></td>
-</tr>
-</tbody>
-</table>
-<p>Save the file, and then apply the default configuration to use the yaml file that you created:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> apply <span class="at">-f</span> pod.yaml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When running this command, you should see confirmation that the pod has been launched:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cecil@localhost:~$</span> kubectl apply <span class="at">-f</span> pod.yaml</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pod/nginx</span> created</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Once the pod has been created, you can SSH into the running pod by using the command below:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> exec <span class="at">-it</span> nginx <span class="at">--</span> /bin/bash</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><em>NOTE: You will need to replace <hostname or="" ip="" address="" here=""> with your EFS servers IP address or hostname. It is important to allow your EFS client server IP address as an inbound firewall rule on your EFS cluster. It is also crucial to ensure that you have your EFS instance as an inbound firewall rule on your EFS client server.</hostname></em></p>
+<p>You can check your mount points by running the command below:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-h</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can test connectivity to your EFS share by going into your EFS directory and creating a test file. The example below creates a 30mb text file that you can use to verify data transfer to your shared directory:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dd if=/dev/zero of=file.out bs=1MB count=30</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you can create that file, then you have the permissions to write to your EFS share.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

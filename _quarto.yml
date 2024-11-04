@@ -12,7 +12,7 @@ website:
         href: https://www.linkedin.com/in/cecil-singh/
 format:
   html:
-    theme: cosmo
+    theme: yeti
     css: styles.css
 
 

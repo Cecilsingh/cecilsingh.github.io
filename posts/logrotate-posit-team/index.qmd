@@ -2,7 +2,7 @@
 title: "Logrotate with Posit Teams"
 author: "Cecil Singh"
 date: "2023-01-25"
-categories: [linux, logging]
+categories: [linux, logging, Posit]
 image: "logrotate.jpg"
 ---
 

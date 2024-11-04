@@ -2,7 +2,7 @@
 title: "VScode Session Timeouts"
 author: "Cecil Singh"
 date: "2023-03-13"
-categories: [vscode]
+categories: [vscode, Posit]
 image: "vscode.jpg"
 ---
 

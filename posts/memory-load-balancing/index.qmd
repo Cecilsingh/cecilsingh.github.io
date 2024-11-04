@@ -2,7 +2,7 @@
 title: "Memory-Based Load Balancing on Posit Workbench"
 author: "Cecil Singh"
 date: "2023-05-14"
-categories: [load balancing, memory, linux]
+categories: [load balancing, memory, linux, Posit]
 image: "memory.jpg"
 ---
 The default load-balancing methods on Posit Workbench largely consider CPU utilization as the determinant for routing between nodes. There may be instances where administrators may wish to uses memory, as opposed to CPU-utilization, to route requests to nodes that are using less RAM. To enable this, set the configuration below in your */etc/rstudio/load-balancer* configuration file:

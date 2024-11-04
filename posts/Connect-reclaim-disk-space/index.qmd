@@ -1,0 +1,78 @@
+---
+title: "Posit Connect Reclaim Disk Space"
+author: "Cecil Singh"
+date: "2022-09-19"
+categories: [Posit, Storage]
+image: "reclaim.jpg"
+---
+
+You may notice that your Posit Connect server can start occupying a large amount of disk space as users start deploying content. There are several configuration changes can help manage the disk space used by Connect.
+
+A large proponent of this disk space can be utilized by published bundles. A bundle is an encapsulated package containing the source code and data necessary to execute your published content. This is stored in the *Server.DataDir* that you have configured. If you have not specified an alternative DataDir, this will be stored in the */var/lib/rstudio-connect* directory.
+
+You may notice your */var/lib/rstudio-connect* directory or your *Server.DataDir* is using a large amount of disk space. By default, these bundles are retained indefinitely.  We'd suggest editing your */etc/rstudio-connect/rstudio-connect.gcfg* file to include this setting:
+
+```default
+[Applications]
+BundleRetentionLimit = 3
+```
+
+> **BundleRetentionLimit**
+> 
+ Maximum number of bundles per app for which we want to retain filesystem data. The default is 0, which means retain everything
+>
+ This limit is the maximum number of bundles per application that you want to retain on the filesystem.  The default is 0, which means every time an application is re-deployed, the prior application bundle is archived on disk.  For applications which contain large amounts of data, this can easily accumulate and become an issue.
+
+Adjusting the value above to a retention limit of 3, from the default of 0, should help free space without any impact on your users.
+
+More information on these directives can be found here:
+
+https://docs.rstudio.com/connect/admin/content-management/#bundle-management
+https://docs.rstudio.com/connect/admin/appendix/configuration/#Applications.BundleRetentionLimit
+
+By default, 24 hours must pass for this change to occur. This is due to the *Applications.BundleReapFrequency* directive which defaults to 24 hours. If you wish this change would take effect sooner, you can set this value to less. For example:
+
+```default
+[Applications] 
+BundleReapFrequency = 1h
+```
+
+Rendering is the process that occurs when you trigger an application to run. Reports are rendered or knit into their HTML or PDF formats. Older versions of these are also kept - but can be removed automatically.
+
+> **Applications.RenderingSweepLimit**
+The maximum number of renderings retained for any one application. When this limit is reached, the oldest renderings for an application will be removed. If this setting is not set or is less than 1, Posit Connect will not remove renderings with respect to the number of renderings per application.
+> 
+Type: integer
+Default: 30
+>
+**Applications.RenderingSweepAge**
+The maximum age of a rendering retained for any one application. Renderings older than this setting will be removed. If this setting is not set or is of a zero value, Posit Connect will not remove renderings with regards to its age.
+>
+Type: duration
+Default: 30d
+>
+**Applications.RenderingSweepFrequency** 
+How often should Posit Connect look for and purge renderings.
+>
+Type: duration
+Default: 1h
+
+Lastly, you can also choose to reap Python environments as below:
+
+>**Applications.PythonEnvironmentReaping**
+Enable the periodic cleanup of unused Python environments.
+>
+Type: boolean
+Default: false
+>
+**Applications.PythonEnvironmentReapFrequency**
+Time between passes for the worker that deletes Python package environments that are no longer in use.
+>
+Type: duration
+Default: 24h
+
+It's worth mentioning that once these directives have been added to your configuration file, you will need to restart Connect for these changes to take effect:
+
+```bash
+sudo systemctl restart rstudio-connect
+```

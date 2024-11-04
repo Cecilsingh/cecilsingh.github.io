@@ -2,7 +2,7 @@
 title: "SSL with Posit Workbench + Launcher"
 author: "Cecil Singh"
 date: "2021-11-26"
-categories: [SSL, Workbench, Launcher]
+categories: [SSL, Workbench, Launcher, Posit]
 image: "ssl.jpg"
 ---
 

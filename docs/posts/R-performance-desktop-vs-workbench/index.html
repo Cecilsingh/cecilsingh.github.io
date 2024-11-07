@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Cecil Singh">
-<meta name="dcterms.date" content="2022-09-19">
+<meta name="dcterms.date" content="2023-02-09">
 
-<title>Cecil’s Data Science Blog - Posit Connect Reclaim Disk Space</title>
+<title>Cecil’s Data Science Blog - R Performance is faster on Posit Desktop than on Posit Workbench</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -149,7 +149,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Posit Connect Reclaim Disk Space</h1>
+      <h1 class="title">R Performance is faster on Posit Desktop than on Posit Workbench</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">Posit</div>
                 <div class="quarto-category">Storage</div>
@@ -170,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">September 19, 2022</p>
+        <p class="date">February 9, 2023</p>
       </div>
     </div>
     
@@ -189,11 +189,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>You may notice that your Posit Connect server can start occupying a large amount of disk space as users start deploying content. There are several configuration changes can help manage the disk space used by Connect.</p>
-<p>A large proponent of this disk space can be utilized by published bundles. A bundle is an encapsulated package containing the source code and data necessary to execute your published content. This is stored in the <em>Server.DataDir</em> that you have configured. If you have not specified an alternative DataDir, this will be stored in the <em>/var/lib/rstudio-connect</em> directory.</p>
-<p>You may notice your <em>/var/lib/rstudio-connect</em> directory or your <em>Server.DataDir</em> is using a large amount of disk space. By default, these bundles are retained indefinitely. We’d suggest editing your <em>/etc/rstudio-connect/rstudio-connect.gcfg</em> file to include this setting:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>[Applications]</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>BundleRetentionLimit = 3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You may notice that scripts execute faster on your local computer using Posit Desktop, when compared to using Posit Workbench.</p>
+<section id="is-there-a-solution" class="level3">
+<h3 class="anchored" data-anchor-id="is-there-a-solution">Is there a solution?</h3>
+<p>Not really, and there’s a good reason for this! There is a difference in CPU clock speeds for servers and on laptops, usually in favour of the laptop. Any differences in CPU, especially clock speed, can translate to the differences in performance that you see. This also depends on the type, make, and model of the CPU, as well as how it handles processing between threads. If the CPU on the laptop and on the server are identical, then you should see similar performance. That said, most of the time, the CPU on laptops are substantially different to the CPU provided on servers. Laptops also feature more powerful graphics processing, due to the incorporation of dedicated GPUs. It’s worth mentioning that most of the time, a laptop will outperform a server when handling code.</p>
+</section>
+<section id="isolation-testing" class="level3">
+<h3 class="anchored" data-anchor-id="isolation-testing">Isolation Testing</h3>
+<p>You can test this between your different environments by running the R code below:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>tictoc<span class="sc">::</span><span class="fu">tic</span>()</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>){</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    j<span class="ot">=</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>tictoc<span class="sc">::</span><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The code above simply runs a for loop from zero to one hundred and counts the time it takes to execute this loop. This is helpful because it is a very minimal code block to run, which isolates the potential for libraries and subroutines slowing down other core components of your computer or server, and focuses on minimal code execution. Ideally, you will run this:</p>
+<ul>
+<li>Workbench IDE on the server</li>
+<li>R command line on the server</li>
+<li>RStudio IDE on the laptop</li>
+<li>R command line on the laptop</li>
+</ul>
 <blockquote class="blockquote">
 <p><strong>BundleRetentionLimit</strong></p>
 <p>Maximum number of bundles per app for which we want to retain filesystem data. The default is 0, which means retain everything</p>
@@ -225,6 +244,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart rstudio-connect</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

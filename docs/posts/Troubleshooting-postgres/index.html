@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Cecil Singh">
-<meta name="dcterms.date" content="2022-09-19">
+<meta name="dcterms.date" content="2022-05-22">
 
-<title>Cecil’s Data Science Blog - Posit Connect Reclaim Disk Space</title>
+<title>Cecil’s Data Science Blog - Troubleshooting Postgres Connection Issues</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -149,10 +149,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Posit Connect Reclaim Disk Space</h1>
+      <h1 class="title">Troubleshooting Postgres Connection Issues</h1>
                                 <div class="quarto-categories">
-                <div class="quarto-category">Posit</div>
-                <div class="quarto-category">Storage</div>
+                <div class="quarto-category">Postgres</div>
+                <div class="quarto-category">Database</div>
               </div>
                   </div>
   </div>
@@ -170,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">September 19, 2022</p>
+        <p class="date">May 22, 2022</p>
       </div>
     </div>
     
@@ -189,42 +189,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>You may notice that your Posit Connect server can start occupying a large amount of disk space as users start deploying content. There are several configuration changes can help manage the disk space used by Connect.</p>
-<p>A large proponent of this disk space can be utilized by published bundles. A bundle is an encapsulated package containing the source code and data necessary to execute your published content. This is stored in the <em>Server.DataDir</em> that you have configured. If you have not specified an alternative DataDir, this will be stored in the <em>/var/lib/rstudio-connect</em> directory.</p>
-<p>You may notice your <em>/var/lib/rstudio-connect</em> directory or your <em>Server.DataDir</em> is using a large amount of disk space. By default, these bundles are retained indefinitely. We’d suggest editing your <em>/etc/rstudio-connect/rstudio-connect.gcfg</em> file to include this setting:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>[Applications]</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>BundleRetentionLimit = 3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<blockquote class="blockquote">
-<p><strong>BundleRetentionLimit</strong></p>
-<p>Maximum number of bundles per app for which we want to retain filesystem data. The default is 0, which means retain everything</p>
-<p>This limit is the maximum number of bundles per application that you want to retain on the filesystem. The default is 0, which means every time an application is re-deployed, the prior application bundle is archived on disk. For applications which contain large amounts of data, this can easily accumulate and become an issue.</p>
-</blockquote>
-<p>Adjusting the value above to a retention limit of 3, from the default of 0, should help free space without any impact on your users.</p>
-<p>More information on these directives can be found here:</p>
-<p>https://docs.rstudio.com/connect/admin/content-management/#bundle-management https://docs.rstudio.com/connect/admin/appendix/configuration/#Applications.BundleRetentionLimit</p>
-<p>By default, 24 hours must pass for this change to occur. This is due to the <em>Applications.BundleReapFrequency</em> directive which defaults to 24 hours. If you wish this change would take effect sooner, you can set this value to less. For example:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>[Applications] </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>BundleReapFrequency = 1h</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Rendering is the process that occurs when you trigger an application to run. Reports are rendered or knit into their HTML or PDF formats. Older versions of these are also kept - but can be removed automatically.</p>
-<blockquote class="blockquote">
-<p><strong>Applications.RenderingSweepLimit</strong> The maximum number of renderings retained for any one application. When this limit is reached, the oldest renderings for an application will be removed. If this setting is not set or is less than 1, Posit Connect will not remove renderings with respect to the number of renderings per application.</p>
-<p>Type: integer Default: 30</p>
-<p><strong>Applications.RenderingSweepAge</strong> The maximum age of a rendering retained for any one application. Renderings older than this setting will be removed. If this setting is not set or is of a zero value, Posit Connect will not remove renderings with regards to its age.</p>
-<p>Type: duration Default: 30d</p>
-<p><strong>Applications.RenderingSweepFrequency</strong> How often should Posit Connect look for and purge renderings.</p>
-<p>Type: duration Default: 1h</p>
-</blockquote>
-<p>Lastly, you can also choose to reap Python environments as below:</p>
-<blockquote class="blockquote">
-<p><strong>Applications.PythonEnvironmentReaping</strong> Enable the periodic cleanup of unused Python environments.</p>
-<p>Type: boolean Default: false</p>
-<p><strong>Applications.PythonEnvironmentReapFrequency</strong> Time between passes for the worker that deletes Python package environments that are no longer in use.</p>
-<p>Type: duration Default: 24h</p>
-</blockquote>
-<p>It’s worth mentioning that once these directives have been added to your configuration file, you will need to restart Connect for these changes to take effect:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart rstudio-connect</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Postgres is the logical choice as a database for many technology stacks, especially those migrating from SQLite3. However, in doing so, can introduce some new challenges to your infrastructure. There are some common “gotchas” when it comes to moving to a newly provisioned Postgres database.</p>
+<section id="allow-access-to-the-database" class="level3">
+<h3 class="anchored" data-anchor-id="allow-access-to-the-database">Allow access to the database</h3>
+<p>By default, a standard PostgreSQL installation will block all inbound connections at the operating system, regardless of your firewall settings. You will need to allow access by modifying your pg_hba.conf configuration file. You will need to add a line that looks something like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a># TYPE  DATABASE        USER            ADDRESS                 METHOD</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>host    all             all             127.0.0.1/32            trust</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This allows all users access to all databases on the localhost. Different organizations will have different security protocols, so it’s best to reach out to your organization’s security team to ensure that you have implemented the correct settings. More information on the configuration options can be found here:</p>
+<p>https://www.postgresql.org/docs/current/auth-pg-hba-conf.html</p>
+<p>From there, restart PostgreSQL for these changes to take effect.</p>
+</section>
+<section id="verify-database-access" class="level3">
+<h3 class="anchored" data-anchor-id="verify-database-access">Verify database access</h3>
+<p>It’s important to ensure that you have allowed the necessary inbound firewall rules for your PostgreSQL server. By default, PostgreSQL listens on port 5432. We need to ensure that our non-db-servers have access to the database, and you can verify this using the pg_isready utility as below: https://www.postgresql.org/docs/current/app-pg-isready.html</p>
+<section id="example-usage" class="level4">
+<h4 class="anchored" data-anchor-id="example-usage">example usage</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pg_isready</span> <span class="at">-d</span> <span class="op">&lt;</span>db_name<span class="op">&gt;</span> -h <span class="op">&lt;</span>host_name<span class="op">&gt;</span> -p <span class="op">&lt;</span>port_number<span class="op">&gt;</span> -U <span class="op">&lt;</span>db_user<span class="op">&gt;</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="exit-status" class="level6">
+<h6 class="anchored" data-anchor-id="exit-status">Exit Status</h6>
+<p>pg_isready returns the following to the shell:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>0 - if the server is accepting connections normally, </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  1 - if the server is rejecting connections (for example during startup), </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  2 - if there was no response to the connection attempt, and </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  3 - if no attempt was made (for example due to invalid parameters).</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Notice:</strong> man pg_isready states: <em>It is not necessary to supply correct user name, password, or database name values to obtain the server status; however, if incorrect values are provided, the server will log a failed connection attempt.</em></p>
 
 
+</section>
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

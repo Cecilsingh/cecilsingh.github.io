@@ -1,0 +1,46 @@
+---
+title: "Troubleshooting Postgres Connection Issues"
+author: "Cecil Singh"
+date: "2022-05-22"
+categories: [Postgres, Database]
+image: "pgdb.jpg"
+---
+
+Postgres is the logical choice as a database for many technology stacks, especially those migrating from SQLite3. However, in doing so,  can introduce some new challenges to your infrastructure. There are some common "gotchas" when it comes to moving to a newly provisioned Postgres database.
+
+### Allow access to the database
+
+By default, a standard PostgreSQL installation will block all inbound connections at the operating system, regardless of your firewall settings. You will need to allow access by modifying your pg_hba.conf configuration file. You will need to add a line that looks something like this:
+
+```default
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+host    all             all             127.0.0.1/32            trust
+```
+
+This allows all users access to all databases on the localhost. Different organizations will have different security protocols, so it's best to reach out to your organization's security team to ensure that you have implemented the correct settings. More information on the configuration options can be found here:
+
+https://www.postgresql.org/docs/current/auth-pg-hba-conf.html
+
+From there, restart PostgreSQL for these changes to take effect.
+
+### Verify database access
+
+It's important to ensure that you have allowed the necessary inbound firewall rules for your PostgreSQL server. By default, PostgreSQL listens on port 5432. We need to ensure that our non-db-servers have access to the database, and you can verify this using the pg_isready utility as below: 
+https://www.postgresql.org/docs/current/app-pg-isready.html
+
+#### example usage
+
+```bash
+pg_isready -d <db_name> -h <host_name> -p <port_number> -U <db_user> 
+```
+###### Exit Status
+
+pg_isready returns the following to the shell:
+
+```default
+0 - if the server is accepting connections normally, 
+  1 - if the server is rejecting connections (for example during startup), 
+  2 - if there was no response to the connection attempt, and 
+  3 - if no attempt was made (for example due to invalid parameters).
+```
+**Notice:** man pg_isready states: *It is not necessary to supply correct user name, password, or database name values to obtain the server status; however, if incorrect values are provided, the server will log a failed connection attempt.*

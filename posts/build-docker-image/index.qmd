@@ -1,0 +1,78 @@
+---
+title: "How to build a Docker image on Linux"
+author: "Cecil Singh"
+date: "2024-11-11"
+categories: [Container, Docker]
+image: "docker.jpg"
+---
+
+Whether you're pushing to dockerhub, or building an image for local use, the process for building docker images is the same. 
+
+### Building the Docker image
+
+First, let's create a directory for us to create a dockerfile:
+
+```bash
+sudo mkdir /sample-docker && cd /sample-docker 
+```
+
+Once complete, we can create our dockerfile:
+
+```bash
+sudo touch Dockerfile
+```
+
+Place the contents of your dockerfile into the Dockerfile file that you just created:
+
+```bash
+cat app.dockerfile > /sample-docker/Dockerfile
+```
+
+In this case, *app.dockerfile* is the original file that we were building the dockerfile in. You can place the contents of your dockerfile directly into the *Dockerfile* that we just created also. For example purposes, a sample dockerfile is below:
+
+```dockerfile
+# Original app.dockerfile
+# This was copied to /sample-docker/dockerfile
+
+# Take the official Postgres image and add a username, password, and listen port
+FROM postgres
+ENV POSTGRES_PASSWORD postgres
+ENV POSTGRES_PORT 5432
+USER postgres
+```
+From there, we can build the image:
+
+```bash
+docker build -t postgres-updated .
+```
+
+In this case, "postgres-updated" is the name of the image. However, this can be changed to anything you like. You will need to be in the directory where your *Dockerfile* is located for the command above to work.
+
+Once the image has finished building, we can take this image:
+
+```bash
+docker build -t postgres-updated .
+```
+
+### Pushing to Dockerhub
+
+Once the image has been built, we can tag it and upload it to dockerhub. We can tag the image as below:
+
+```bash
+docker tag postgres-updated <reponame>/postgres-updated
+```
+
+Where *<reponame>* is the name of our docker repository. Once tagged, we can login to our docker account via the command line:
+
+```bash
+docker login -u "username" -p "password" docker.io
+```
+
+Where username is your *dockerhub* username, and *password* is your dockerhub password. 
+
+Lastly, we can go ahead and push the image to our docker repository:
+
+```bash
+docker push <reponame>/postgres-updated:latest
+```
+Where *<reponame>* is the name of your docker repository. 

@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/build-docker-image/index.html",
       "/posts/sqlite-script/index.html",
       "/posts/run-shiny-apps-command-line/index.html",
       "/posts/memory-load-balancing/index.html",

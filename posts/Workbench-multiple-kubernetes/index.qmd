@@ -1,0 +1,102 @@
+---
+title: "Workbench Launching to Multiple Kubernetes Clusters"
+author: "Cecil Singh"
+date: "2022-07-11"
+categories: [Kubernetes, Posit]
+image: "multiplekubernetes.jpg"
+---
+
+### Is it possible to select from multiple Kubernetes clusters when launching a session from Workbench?
+
+Yes, it is possible to have multiple Kubernetes clusters on a single Workbench instance. As long the two clusters can talk to each other, the Workbench instance can launch a session on a choice of multiple Kubernetes clusters. You can use the */etc/rstudio/launcher.kubernetes.conf* file to target a Kubernetes in a single node cluster.
+
+See the example below for a workbench instance that uses two separate Kubernetes clusters. First, in the */etc/rstudio/launcher.conf* configuration file, you will need to specify two different clusters. It is important to specify a unique config-file for each cluster. See the example below for how this can look:
+
+```bash
+[server]
+address=127.0.0.1
+port=5559
+server-user=rstudio-server
+admin-group=rstudio-server
+authorization-enabled=1
+thread-pool-size=4
+enable-debug-logging=1
+
+[cluster]
+name=KubesOne
+type=Kubernetes
+config-file=/etc/rstudio/launcher.kubes.one.conf
+
+[cluster]
+name=KubesTwo
+type=Kubernetes
+config-file=/etc/rstudio/launcher.kubes.two.conf
+```
+
+Then, create two Kubernetes configuration files, with the profile-config configuration added to point to a unique profile file. See the */etc/rstudio/launcher.kubes.one.conf* file below as an example:
+
+```bash
+api-url=<KUBERNETES-API-ENDPOINT>
+auth-token=<KUBERNETES-CLUSTER-TOKEN>
+certificate-authority=<BASE-64-ENCODED-CA-CERTIFICATE>
+profile-config=/etc/rstudio/launcher.kubes.one.profiles.conf
+```
+From there, you can edit the */etc/rstudio/launcher.kubes.two.conf* file as a small example:
+
+```bash
+api-url=<KUBERNETES-API-ENDPOINT>
+auth-token=<KUBERNETES-CLUSTER-TOKEN>
+certificate-authority=<BASE-64-ENCODED-CA-CERTIFICATE>
+profile-config=/etc/rstudio/launcher.kubes.two.profiles.conf
+```
+
+Then, configure two profile Kubernetes profiles with the resources allowed for the different environments. Here is an example for the */etc/rstudio/launcher.kubes.one.profiles.conf* configuration file which allows for a larger pod size:
+
+```bash
+[*]
+default-cpus=1
+default-mem-mb=1024
+max-cpus=4
+max-mem-mb=4096
+container-images=rstudio/r-session-complete:centos7-2021.09.2-382.pro1
+default-container-image=rstudio/r-session-complete:centos7-2021.09.2-382.pro1
+allow-unknown-images=0
+```
+
+See this example for */etc/rstudio/launcher.kubes.two.profiles.conf* configuration file:
+
+```bash
+[*]
+default-cpus=4
+default-mem-mb=4096
+max-cpus=8
+max-mem-mb=8192
+container-images=rstudio/r-session-complete:centos7-2021.09.2-382.pro1
+default-container-image=rstudio/r-session-complete:centos7-2021.09.2-382.pro1
+allow-unknown-images=0
+```
+
+One last thing to note, if the different clusters require different types of storage mounts, then you'll need to add unique mount configurations in the */etc/rstudio/launcher-mounts* configuration file:
+
+```bash
+Host: <NFS-IP-ADDRESS>
+Path: /home/{USER}
+MountPath: /home/{USER}
+ReadOnly: false
+Cluster: KubesOne
+
+Host: <NFS-IP-ADDRESS>
+Path: /home/{USER}
+MountPath: /home/{USER}
+ReadOnly: false
+Cluster: KubesTwo
+```
+
+Or if the clusters will use the same mounts, then one mount definition with no cluster configuration will work:
+
+```bash
+Host: <NFS-IP-ADDRESS>
+Path: /home/{USER}
+MountPath: /home/{USER}
+ReadOnly: false
+```

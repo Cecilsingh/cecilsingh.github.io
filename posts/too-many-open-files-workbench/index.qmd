@@ -1,0 +1,54 @@
+---
+title: "Too Many Open Files error on Posit Workbench"
+author: "Cecil Singh"
+date: "2022-11-28"
+categories: [Posit, Linux]
+image: "openfiles.jpg"
+---
+
+### Problem
+
+You may see errors in logs similar to the below when using Posit Workbench:
+```default
+[rsession-<username>] ERROR system error 24 (Too many open files)
+```
+
+
+### Solution
+
+It's a good idea to use a command like *lsof* to check and see what processes are currently using a large number of file descriptors. Alternatively, we can increase the limit on the number of open files for the affected user.
+
+To do so, you will need to modify your */etc/rstudio/rsession-profile* configuration file with the below (you may need to create this file if it doesn't exist):
+
+```bash
+# /etc/rstudio/rsession-profile
+ulimit -n 4096
+```
+
+It's worth noting that this file will need 755 permissions. You can run the following command to set this:
+
+```bash
+chmod 755 /etc/rstudio/rsession-profile
+```
+
+Save the above file, and then restart the Workbench and Launcher services:
+
+```bash
+sudo rstudio-server restart
+```
+```bash
+sudo rstudio-launcher restart
+```
+
+Once the R session has restarted, you should now see this value in effect by running the following commands in the R terminal:
+
+
+```R
+system("ulimit -n")
+```
+###### OR
+```R
+system("ulimit -a")
+```
+
+Note that you may need to increase the *ulimit* value above to more than 4096 if you are still seeing the issue!
